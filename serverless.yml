@@ -1,0 +1,400 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: hiringhooddev
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: docker-demo
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: hh-marketdemo
+
+ 
+provider:
+  name: aws
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  apiGateway:
+    binaryMediaTypes:
+      - "*/*"
+  httpApi:
+    cors: true
+  environment:
+    MONGODB_URI: ${ssm:/my-app/${self:provider.stage}/mongodb-uri}
+    S3_BUCKET: ${self:custom.s3Bucket.${self:provider.stage}}
+    OPENAI_API_KEY: ${ssm:/my-app/${self:provider.stage}/chatgpt}
+    MONGODB_FIND_URL: ${self:custom.mongodbApiUrls.find.${self:provider.stage}}
+    MONGODB_FINDONE_URL: ${self:custom.mongodbApiUrls.findOne.${self:provider.stage}}
+    MONGODB_DELETEMANY_URL: ${self:custom.mongodbApiUrls.deleteMany.${self:provider.stage}}
+    MONGODB_DELETEONE_URL: ${self:custom.mongodbApiUrls.deleteOne.${self:provider.stage}}
+    MONGODB_API_KEY: ${self:custom.mongodbApiKey.${self:provider.stage}}
+
+  
+
+  ecr:
+    images:
+      marketplace-demo:   # This defines the image under ecr.images
+        path: ./
+
+functions:
+  emp1Handler:
+   image:
+    name: marketplace-demo
+    command: ["functions/emp1Handler.handler"]
+   timeout: 29 
+   events:
+    - httpApi:
+        path: /signUpLogIn
+        method: post
+    - httpApi:
+        path: /login
+        method: post
+    - httpApi:
+        path: /createAccount
+        method: post
+    - httpApi:
+        path: /getToKnowUs
+        method: get    
+    - httpApi:
+        path: /createProfileEmpInfo
+        method: post
+    - httpApi:
+        path: /empCount
+        method: get
+    - httpApi:
+        path: /regYear
+        method: get
+    - httpApi:
+        path: /createEmpSPOCInfo
+        method: post
+    - httpApi:
+        path: /createEmpLegalInfo
+        method: post
+    - httpApi:
+        path: /createEmpOfficeInfo
+        method: post
+  
+  contestHandler:
+   image:
+    name: marketplace-demo
+    command: ["functions/contestHandler.handler"]
+   timeout: 29
+   events:
+    - httpApi:
+        path: /createContest
+        method: post
+    - httpApi:
+        path: /contestDriveAvailability
+        method: post
+    - httpApi:
+        path: /contestPlan
+        method: post
+    - httpApi:
+        path: /getContest
+        method: get
+    - httpApi:
+        path: /modifyContest
+        method: put
+    - httpApi:
+        path: /getAllContests
+        method: get
+    - httpApi:
+        path: /getActiveContests
+        method: get
+    - httpApi:
+        path: /getOnholdContests
+        method: get
+    - httpApi:
+        path: /getCompletedContests
+        method: get
+    - httpApi:
+        path: /sendOffer
+        method: post
+    - httpApi:
+        path: /changeStatus
+        method: put
+    - httpApi:
+        path: /moveToLevels
+        method: post
+    - httpApi:
+        path: /moveToRejected
+        method: post
+
+  jobseekerHandler:
+   image:
+    name: marketplace-demo
+    command: ["functions/jobseekerHandler.handler"]
+   timeout: 29
+   events:    
+    - httpApi:
+        path: /jobSeekerSignup
+        method: post
+    - httpApi:
+        path: /jobSeekerLogin
+        method: post
+    - httpApi:
+        path: /jsSocailSignUp
+        method: post
+    - httpApi:
+        path: /jsSocailLogin
+        method: post         
+    - httpApi:
+        path: /getAllContestsJobSeeker
+        method: get
+    - httpApi:
+        path: /viewContestJdById
+        method: get        
+    - httpApi:
+        path: /jobSeekerPersonalInfo
+        method: post
+    - httpApi:
+        path: /jobSeekerWorkExp
+        method: post
+    - httpApi:
+        path: /jsSalaryInsights
+        method: post
+    - httpApi:
+        path: /getjobSeekerExistingProfile
+        method: get       
+    - httpApi:
+        path: /dropDownPopulate
+        method: get
+    - httpApi:
+        path: /saveMarketplaceJobseekerPreferences
+        method: post       
+    - httpApi:
+        path: /jsCvUpload
+        method: post
+    - httpApi:
+        path: /getJobseekerResumeParserDetails
+        method: get
+    - httpApi:
+        path: /editJobseekerCompleteYourProfile
+        method: post 
+  
+  recruiterHandler:
+   image:
+    name: marketplace-demo
+    command: ["functions/recruiterHandler.handler"]
+   timeout: 29
+   events:
+    - httpApi:
+        path: /kanbanView
+        method: get
+    - httpApi:
+        path: /editRecruiterProfileDetails
+        method: post       
+    - httpApi:
+        path: /statusUpdateToCompleted
+        method: post
+    - httpApi:
+        path: /statusUpdateToDraft
+        method: post        
+    - httpApi:
+        path: /uploadProfiles
+        method: post
+    - httpApi:
+        path: /getAllProfileDetails
+        method: get  
+    - httpApi:
+        path: /displayQuestions
+        method: get
+    - httpApi:
+        path: /questionReaction
+        method: post     
+    - httpApi:
+        path: /preDuplicationCheck
+        method: post
+    - httpApi:
+        path: /fullDuplicationCheck
+        method: post
+
+  admin1handler:
+   image:
+    name: marketplace-demo
+    command: ["functions/admin1Handler.handler"]
+   timeout: 29
+   events:
+    - httpApi:
+        path: /adminLogin
+        method: post
+    - httpApi:
+        path: /superAdminLogin
+        method: post    
+    - httpApi:
+        path: /approveRejectContest
+        method: post
+    - httpApi:
+        path: /adminCreateContest
+        method: post
+    - httpApi:
+        path: /adminDriveAvailability
+        method: post
+    - httpApi:
+        path: /editAdminContestDetails
+        method: post
+    - httpApi:
+        path: /getContestPreview
+        method: get
+    - httpApi:
+        path: /getContestsByStatus
+        method: get
+    - httpApi:
+        path: /contestActions
+        method: post      
+    - httpApi:
+        path: /empDetailsSelf
+        method: post
+    - httpApi:
+        path: /empDetailsAdd
+        method: post
+    - httpApi:
+        path: /empDetailsRegistered
+        method: post
+    - httpApi:
+        path: /getAllEmpDetails
+        method: get
+    - httpApi:
+        path: /getEmpDetails
+        method: get        
+    - httpApi:
+        path: /getAllRecruiters
+        method: get      
+    - httpApi:
+        path: /createAdminUser
+        method: post
+    - httpApi:
+        path: /getAdminUser
+        method: get
+    - httpApi:
+        path: /editAdminUser
+        method: post        
+    - httpApi:
+        path: /adminSaveImage
+        method: post
+
+  admin2handler:
+   image:
+    name: marketplace-demo
+    command: ["functions/admin2Handler.handler"]
+   timeout: 29
+   events:
+    - httpApi:
+        path: /createJobseekerUser
+        method: post
+    - httpApi:
+        path: /getJobseekerUser
+        method: get
+    - httpApi:
+        path: /editJobseekerUser
+        method: post    
+    - httpApi:
+        path: /createFreelancerUser
+        method: post
+    - httpApi:
+        path: /getFreelancerUser
+        method: get
+    - httpApi:
+        path: /editFreelancerUser
+        method: post   
+    - httpApi:
+        path: /createRecruiterUser
+        method: post
+    - httpApi:
+        path: /getRecruiterUser
+        method: get
+    - httpApi:
+        path: /editRecruiterUser
+        method: post         
+    - httpApi:
+        path: /createEmployerUser
+        method: post
+    - httpApi:
+        path: /getEmployerUser
+        method: get
+    - httpApi:
+        path: /editEmployerUser
+        method: post         
+    - httpApi:
+        path: /adminCreateUserPreview
+        method: get     
+    - httpApi:
+        path: /activeContestsOverview
+        method: get
+    - httpApi:
+        path: /deleteAdminContest
+        method: post
+    - httpApi:
+        path: /getAdminControls
+        method: get
+
+  admin3handler:
+   image:
+    name: marketplace-demo
+    command: ["functions/admin3Handler.handler"]
+   timeout: 29
+   events:
+    - httpApi:
+        path: /noticePeriodTracker
+        method: get
+    - httpApi:
+        path: /noticePeriodDrilldown
+        method: get        
+    - httpApi:
+        path: /vendorsOverview
+        method: get
+    - httpApi:
+        path: /vendorContestsOverview
+        method: get        
+    - httpApi:
+        path: /adminActionEmployers
+        method: post
+  admin4handler:
+   image:
+    name: marketplace-demo
+    command: ["functions/admin4Handler.handler"]
+   timeout: 30  
+   events:
+    - httpApi:
+        path: /parseResume
+        method: post     
+    - httpApi:
+        path: /getAllJobseekersContests
+        method: get     
+    - httpApi:
+        path: /pageVisibility
+        method: post
+    - httpApi:
+        path: /updateContestVisibility
+        method: post        
+    - httpApi:
+        path: /viewerLogin
+        method: post         
+    - httpApi:
+        path: /adminJobseekerEmailer
+        method: post
+
+custom:
+  mongodbUri:
+    dev: ${ssm:/my-app/dev/mongodb-uri}
+    prod: ${ssm:/my-app/prod/mongodb-uri} 
+  s3Bucket:
+    dev: appsdevelop  
+    prod: watermarkstorage 
+  openaiApiKey:
+    dev: ${ssm:/my-app/dev/chatgpt}
+    prod: ${ssm:/my-app/prod/chatgpt}
+  mongodbApiUrls:
+    find:
+      dev: "https://eu-central-1.aws.data.mongodb-api.com/app/data-wflgbwq/endpoint/data/v1/action/find"
+      prod: "https://ap-south-1.aws.data.mongodb-api.com/app/data-otlxf/endpoint/data/v1/action/find"
+    findOne:
+      dev: "https://eu-central-1.aws.data.mongodb-api.com/app/data-wflgbwq/endpoint/data/v1/action/findOne"
+      prod: "https://ap-south-1.aws.data.mongodb-api.com/app/data-otlxf/endpoint/data/v1/action/findOne"
+    deleteMany:
+      dev: "https://eu-central-1.aws.data.mongodb-api.com/app/data-wflgbwq/endpoint/data/v1/action/deleteMany"
+      prod: "https://ap-south-1.aws.data.mongodb-api.com/app/data-otlxf/endpoint/data/v1/action/deleteMany"
+    deleteOne:
+      dev: "https://eu-central-1.aws.data.mongodb-api.com/app/data-wflgbwq/endpoint/data/v1/action/deleteOne"
+      prod:  "https://ap-south-1.aws.data.mongodb-api.com/app/data-otlxf/endpoint/data/v1/action/deleteOne"
+  mongodbApiKey:
+    dev: "QdlgxS9WGMxIvWOfSGQny3HdNV2ikoCKSRNlkLDpSfm377lIMZY8KK1seuPSYCrA"
+    prod: "LpJI0GUpwYLdsuuDJHkGmyZ2nJFgF9UJYFR1QQvhvRzmiTplYJQlBcgqBfwNE8u7"
+            
