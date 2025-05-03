@@ -103,7 +103,7 @@ functions:
         method: get
     - httpApi:
         path: /getCompletedContests
-        method: get
+        method: post
     - httpApi:
         path: /sendOffer
         method: post
